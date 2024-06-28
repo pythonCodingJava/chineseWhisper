@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const model = require("../model/userModel");
 const validator = require("email-validator");
+const { generateToken } = require("../services/services");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -41,7 +42,7 @@ module.exports.login = async (req, res, next) => {
       }
     }
 
-    return res.status(201).send(
+    res.status(201).send(
       JSON.stringify({
         Username: user.Username,
         email: user.email,

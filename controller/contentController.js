@@ -5,12 +5,14 @@ const cmnt = require("../model/commentModel");
 
 module.exports.getAll = async (req, res, next) => {
   try {
+    let arg = { $lt: req.body.date };
+    if(req.body.type == -1) arg = { $gte: new Date(req.body.date) }
     let data = await model
-      .find({ createdAt: { $lt: req.body.date } })
+      .find({ createdAt: arg })
       .sort({ createdAt: -1 })
-      .limit(5)
+      .limit(10)
       .populate("createdBy");
-      
+
     let response = [];
     data.forEach((item) => {
       let dataPoint = {
@@ -68,7 +70,6 @@ module.exports.create = async (req, res, next) => {
           createdBy: person._id,
           createdAt: req.body.date,
         });
-        console.log(forum);
         forum.save();
       });
 

@@ -1,9 +1,12 @@
+
 const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/userRoutes.js')
+const actionRouter = require('./routes/actionRoutes.js')
 const forum = require('./model/forumModel.js')
 const user = require('./model/userModel.js');
 const comment = require('./model/commentModel.js');
+
 
 require('dotenv').config();
 
@@ -36,6 +39,7 @@ const addForum = async ()=>{
 server.use(require('cors')());
 server.use(express.json());
 server.use("/", router);
+server.use("/content/action/", actionRouter);
 
 server.listen(process.env.PORT, ()=>{
     console.log(`Server started on port ${process.env.PORT}`);
