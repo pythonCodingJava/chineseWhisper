@@ -42,7 +42,11 @@ module.exports.login = async (req, res, next) => {
       }
     }
 
-    res.status(201).send(
+    res.cookie('uid',generateToken({Username:Username}), {
+      httpOnly:true
+    });
+
+    return res.status(201).send(
       JSON.stringify({
         Username: user.Username,
         email: user.email,
@@ -55,3 +59,13 @@ module.exports.login = async (req, res, next) => {
     next(err);
   }
 };
+
+module.exports.logout = (req,res,next) =>{
+  try{
+    res.clearCookie('uid');
+    res.sendStatus(201);
+  }catch(e){
+    res.status(402).json({message:"Couldnt log out"})
+    next(e);
+  }
+}

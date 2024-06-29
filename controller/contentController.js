@@ -62,7 +62,7 @@ module.exports.like = async (req, res, next) => {
 module.exports.create = async (req, res, next) => {
   try {
     const person = await user
-      .findOne({ Username: req.body.createdBy })
+      .findOne({ Username: req.body.user })
       .then((person) => {
         const forum = new model({
           title: req.body.title,
@@ -137,7 +137,7 @@ module.exports.likeCmt = async (req, res, next) => {
 module.exports.comment = async (req, res, next) => {
   try {
     const data = req.body;
-    const from = await user.findOne({ Username: data.from });
+    const from = await user.findOne({ Username: data.user });
     const cmt = new cmnt({
       body: data.body,
       from: from._id,

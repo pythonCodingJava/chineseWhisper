@@ -6,6 +6,7 @@ const actionRouter = require('./routes/actionRoutes.js')
 const forum = require('./model/forumModel.js')
 const user = require('./model/userModel.js');
 const comment = require('./model/commentModel.js');
+const Auth_middleware = require('./middleware/Auth_middleware.js');
 
 
 require('dotenv').config();
@@ -36,10 +37,16 @@ const addForum = async ()=>{
     cmnttoedit.replies.push(cmnt);
     await cmnttoedit.save();
 }
-server.use(require('cors')());
+
+server.use(require('cors')({
+    origin:'http://localhost:5174',
+    credentials:true
+}));
+
 server.use(express.json());
+server.use(require('cookie-parser')())
 server.use("/", router);
-server.use("/content/action/", actionRouter);
+server.use("/content/action/", Auth_middleware ,actionRouter);
 
 server.listen(process.env.PORT, ()=>{
     console.log(`Server started on port ${process.env.PORT}`);

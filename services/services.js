@@ -5,4 +5,5 @@ const generateToken = (data)=>{
     const token = jwt.sign(data, secretKey)
     return token;
 }
+
  module.exports = {generateToken}
