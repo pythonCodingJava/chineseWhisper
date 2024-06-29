@@ -39,7 +39,7 @@ const addForum = async ()=>{
 }
 
 server.use(require('cors')({
-    origin:'http://localhost:5174',
+    origin:process.env.ORIGIN,
     credentials:true
 }));
 
