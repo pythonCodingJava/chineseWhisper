@@ -43,7 +43,8 @@ module.exports.login = async (req, res, next) => {
     }
 
     res.cookie('uid',generateToken({Username:Username}), {
-      httpOnly:true
+      httpOnly:true,
+      secure:true
     });
 
     return res.status(201).send(
