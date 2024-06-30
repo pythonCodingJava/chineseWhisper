@@ -11,26 +11,11 @@ module.exports.getAll = async (req, res, next) => {
       .find({ createdAt: arg })
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate("createdBy");
+      .populate({path:"createdBy", select:"Username"});
 
-    let response = [];
-    data.forEach((item) => {
-      let dataPoint = {
-        title: item.title,
-        body: item.body,
-        createdAt: item.createdAt,
-        _id: item._id,
-        likes: item.likes,
-        dislikes: item.dislikes,
-        createdBy: {
-          Username: item.createdBy.Username,
-        }
-      };
-      response.push(dataPoint);
-    });
     let num = await model.countDocuments();
 
-    res.send(JSON.stringify({ data: response, num: num }));
+    res.send(JSON.stringify({ data: data, num: num }));
   } catch (err) {
     next(err);
   }
@@ -142,6 +127,7 @@ module.exports.comment = async (req, res, next) => {
       body: data.body,
       from: from._id,
       tier: data.tier,
+      date:new Date(),
       to: data.to,
     });
     cmt.save().then((comment) => {
