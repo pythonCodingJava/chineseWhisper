@@ -44,7 +44,9 @@ module.exports.login = async (req, res, next) => {
 
     res.cookie('uid',generateToken({Username:Username}), {
       httpOnly:true,
-      secure:true
+      secure:true,
+      sameSite:'none',
+      domain:process.env.ORIGIN
     });
 
     return res.status(201).send(
