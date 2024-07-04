@@ -1,4 +1,4 @@
-import { verify, decode } from "jsonwebtoken";
+const { verify, decode } =require( "jsonwebtoken" );
 
 
 export default async(req,res,next)=>{
