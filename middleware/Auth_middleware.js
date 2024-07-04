@@ -1,7 +1,7 @@
-const { verify, decode } =require( "jsonwebtoken" );
+const { verify, decode } = require("jsonwebtoken");
 
 
-export default async(req,res,next)=>{
+module.exports = async(req,res,next)=>{
     try{
         const token = req.cookies?.uid;
         if(token){
