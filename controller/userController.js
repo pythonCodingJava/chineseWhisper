@@ -44,6 +44,7 @@ module.exports.login = async (req, res, next) => {
 
     res.cookie('uid',generateToken({Username:Username}), {
       httpOnly:true,
+      secure:true,
       sameSite:'none',
     });
 
