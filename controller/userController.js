@@ -50,6 +50,7 @@ module.exports.login = async (req, res, next) => {
 
     return res.status(201).send(
       JSON.stringify({
+        id:user._id,
         Username: user.Username,
         email: user.email,
         comments: user.comments,

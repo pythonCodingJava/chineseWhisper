@@ -12,15 +12,19 @@ const comment = new mongoose.Schema({
     },
     to:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Forum",
+        refPath:"postedFor",
         required:true
+    },
+    postedFor:{
+        type:String,
+        enum:['Forum', 'Comment']
     },
     tier:{
         type:Number,
         required:true
     },
     likes:{
-        type:Number,
+        type:[mongoose.Schema.Types.ObjectId],
         required:true
     },
     date:{
@@ -34,7 +38,6 @@ const comment = new mongoose.Schema({
 }, {collection:"Comments"});
 
 comment.path('date').default(new Date())
-comment.path('likes').default(0);
 comment.path('tier').default(1);
 
 module.exports = mongoose.model("Comment", comment);

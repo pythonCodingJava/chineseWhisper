@@ -12,16 +12,17 @@ const ForumSchema = new mongoose.Schema({
         type:Date,
         required:true
     },
+    category:{
+        type:Number,
+        required:true
+    },
     createdBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref:'User'
     },
     likes:{
-        type:Number,
-        required:true
-    },
-    dislikes:{
-        type:Number,
+        type:[mongoose.Schema.Types.ObjectId],
+        ref:'User',
         required:true
     },
     comments: {
@@ -31,7 +32,6 @@ const ForumSchema = new mongoose.Schema({
 }, {collection:"Forums"});
 
 ForumSchema.path('createdAt').default(new Date())
-ForumSchema.path('likes').default(0);
-ForumSchema.path('dislikes').default(0);
+ForumSchema.path('category').default(1)
 
 module.exports = mongoose.model('Forum',ForumSchema);

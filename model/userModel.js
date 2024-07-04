@@ -18,18 +18,6 @@ const UserSchema = new mongoose.Schema({
     },
     salt:{
         type:String
-    },
-    likedForums :{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'Forum'
-    },
-    likedComments :{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'Comment'
-    },
-    comments:{
-        type:[mongoose.Schema.Types.ObjectId],
-        ref:'Comment'
     }
 }, {collection:'Users'});
 
