@@ -18,6 +18,9 @@ const UserSchema = new mongoose.Schema({
     },
     salt:{
         type:String
+    },
+    notifications:{
+        type:[String]
     }
 }, {collection:'Users'});
 

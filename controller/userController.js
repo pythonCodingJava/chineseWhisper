@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const model = require("../model/userModel");
 const validator = require("email-validator");
 const { generateToken } = require("../services/services");
+const index = require("../index");
 
 module.exports.register = async (req, res, next) => {
   try {
@@ -65,6 +66,7 @@ module.exports.login = async (req, res, next) => {
 
 module.exports.logout = (req,res,next) =>{
   try{
+    index.io.socketsLeave(req.body.user)
     res.clearCookie('uid');
     res.sendStatus(201);
   }catch(e){

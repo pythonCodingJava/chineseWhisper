@@ -7,6 +7,7 @@ router.post('/auth/login', controller.login)
 
 router.post('/content', cntcntrlr.getAll);
 router.post('/content/fetch', cntcntrlr.getPost);
+router.post('/content/fetchCmt', cntcntrlr.getCmtPath);
 
 router.post('/content/replies', cntcntrlr.getComments);
 

@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const model = require("../model/forumModel");
 const user = require("../model/userModel");
 const cmnt = require("../model/commentModel");
+const index = require("../index");
 
 module.exports.getAll = async (req, res, next) => {
   try {
@@ -30,11 +31,22 @@ module.exports.like = async (req, res, next) => {
       forum.likes.splice(forum.likes.indexOf(likingUser._id), 1);
     } else {
       forum.likes.push(likingUser);
+      index.io.in(forum.createdBy.toString()).emit("notify", {
+        id: forum._id,
+        type: "like",
+        liking: "post",
+        user: likingUser.Username,
+        likes: forum.likes.length,
+        title: forum.title,
+      });
     }
 
     await likingUser.save();
     await forum.save();
+    res.sendStatus(201);
   } catch (e) {
+    console.log(e);
+    res.sendStatus(401);
     next(e);
   }
 };
@@ -55,6 +67,7 @@ module.exports.create = async (req, res, next) => {
 
     res.sendStatus(201);
   } catch (e) {
+    res.sendStatus(401);
     next(e);
   }
 };
@@ -76,7 +89,7 @@ module.exports.getPost = async (req, res, next) => {
       .populate({ path: "from", select: "Username" });
 
     const data = {
-      _id:forum._id,
+      _id: forum._id,
       title: forum.title,
       body: forum.body,
       createdBy: forum.createdBy,
@@ -86,6 +99,7 @@ module.exports.getPost = async (req, res, next) => {
     };
     res.status(201).send(JSON.stringify(data));
   } catch (e) {
+    res.sendStatus(401);
     next(e);
   }
 };
@@ -100,11 +114,27 @@ module.exports.getComments = async (req, res, next) => {
     const replies = await cmnt
       .find({ to: req.body._id })
       .sort({ date: -1 })
-      .limit(20)
       .populate({ path: "from", select: "Username" });
 
     res.send(JSON.stringify(replies));
   } catch (e) {
+    next(e);
+  }
+};
+
+module.exports.getCmtPath = async (req, res, next) => {
+  try {
+    let cmt = await cmnt.findOne({ _id: req.body.id });
+    let data = [];
+    while (cmt.postedFor != "Forum") {
+      data.push(cmt.to);
+      cmt = await cmnt.findOne({ _id: cmt.to });
+    }
+    data.push(req.body.id);
+
+    res.status(201).send(JSON.stringify({ forum: cmt.to, path: data }));
+  } catch (e) {
+    res.sendStatus(401);
     next(e);
   }
 };
@@ -115,17 +145,25 @@ module.exports.likeCmt = async (req, res, next) => {
     const likingUser = await user.findOne({ Username: req.body.user });
 
     if (cmt.likes.includes(likingUser._id)) {
-      cmt.likes.splice(
-        cmt.likes.indexOf(likingUser._id),
-        1
-      );
+      cmt.likes.splice(cmt.likes.indexOf(likingUser._id), 1);
     } else {
       cmt.likes.push(likingUser);
+      index.io.in(cmt.from.toString()).emit("notify", {
+        id: cmt._id,
+        type: "like",
+        liking: "comment",
+        user: likingUser.Username,
+        likes: cmt.likes.length,
+        title: cmt.body,
+      });
     }
 
     await likingUser.save();
     await cmt.save();
+
+    res.sendStatus(201);
   } catch (e) {
+    res.sendStatus(401);
     next(e);
   }
 };
@@ -134,11 +172,13 @@ module.exports.comment = async (req, res, next) => {
   try {
     const data = req.body;
     const from = await user.findOne({ Username: data.user });
-    
+
     let to = data.to;
+    let toPost = await model.findOne({ _id: to });
     let postedTo = "Forum";
     if (data.replyTo) {
-      postedTo = "Comment"
+      toPost = await cmnt.findOne({_id:data.replyTo})
+      postedTo = "Comment";
       to = data.replyTo;
     }
 
@@ -148,14 +188,22 @@ module.exports.comment = async (req, res, next) => {
       tier: data.tier,
       date: new Date(),
       to: to,
-      postedFor:postedTo
+      postedFor: postedTo,
     });
     cmt.save().then((comment) => {
+      index.io.in(data.replyTo?toPost.from._id.toString():toPost.createdBy._id.toString()).emit("notify", {
+        id: comment._id,
+        type: "comment",
+        commenting: data.replyTo?"comment":"post",
+        user: from.Username,
+        body: data.body,
+        title: data.replyTo?toPost.body:toPost.title,
+      });
+
       res.status(201).send(JSON.stringify({ id: comment._id }));
     });
-
-    
   } catch (e) {
+    res.sendStatus(401);
     next(e);
   }
 };
