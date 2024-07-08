@@ -56,7 +56,8 @@ module.exports.login = async (req, res, next) => {
         email: user.email,
         comments: user.comments,
         liked:user.likedForums,
-        likedcmt:user.likedComments
+        likedcmt:user.likedComments,
+        notifications:user.notifications
       })
     );
   } catch (err) {

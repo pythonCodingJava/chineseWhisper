@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema({
         type:String
     },
     notifications:{
-        type:[String]
+        type:[]
     }
 }, {collection:'Users'});
 

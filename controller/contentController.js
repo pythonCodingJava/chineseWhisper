@@ -3,6 +3,7 @@ const model = require("../model/forumModel");
 const user = require("../model/userModel");
 const cmnt = require("../model/commentModel");
 const index = require("../index");
+const {notifyUser} = require('../services/notifyUser');
 
 module.exports.getAll = async (req, res, next) => {
   try {
@@ -31,7 +32,7 @@ module.exports.like = async (req, res, next) => {
       forum.likes.splice(forum.likes.indexOf(likingUser._id), 1);
     } else {
       forum.likes.push(likingUser);
-      index.io.in(forum.createdBy.toString()).emit("notify", {
+      notifyUser(forum.createdBy, {
         id: forum._id,
         type: "like",
         liking: "post",
@@ -148,7 +149,18 @@ module.exports.likeCmt = async (req, res, next) => {
       cmt.likes.splice(cmt.likes.indexOf(likingUser._id), 1);
     } else {
       cmt.likes.push(likingUser);
-      index.io.in(cmt.from.toString()).emit("notify", {
+      
+      // const notification = {
+      //   id: cmt._id,
+      //   type: "like",
+      //   liking: "comment",
+      //   user: likingUser.Username,
+      //   likes: cmt.likes.length,
+      //   title: cmt.body,
+      // }
+      // index.io.in(cmt.from.toString()).emit("notify", notification);
+
+      notifyUser(cmt.from, {
         id: cmt._id,
         type: "like",
         liking: "comment",
@@ -190,8 +202,22 @@ module.exports.comment = async (req, res, next) => {
       to: to,
       postedFor: postedTo,
     });
-    cmt.save().then((comment) => {
-      index.io.in(data.replyTo?toPost.from._id.toString():toPost.createdBy._id.toString()).emit("notify", {
+
+    cmt.save().then(async (comment) => {
+
+      // const notification = {
+      //   id: comment._id,
+      //   type: "comment",
+      //   commenting: data.replyTo?"comment":"post",
+      //   user: from.Username,
+      //   body: data.body,
+      //   title: data.replyTo?toPost.body:toPost.title,
+      // };
+      // const dudeToNotify = await user.findOne({_id:data.replyTo?toPost.from._id:toPost.createdBy._id});
+      // dude.notifications.push(notification)
+      // index.io.in(data.replyTo?toPost.from._id.toString():toPost.createdBy._id.toString()).emit("notify", notification);
+      
+      notifyUser(data.replyTo?toPost.from._id:toPost.createdBy._id, {
         id: comment._id,
         type: "comment",
         commenting: data.replyTo?"comment":"post",
