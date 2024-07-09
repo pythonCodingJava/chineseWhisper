@@ -26,7 +26,7 @@ module.exports.getAll = async (req, res, next) => {
 module.exports.like = async (req, res, next) => {
   try {
     const forum = await model.findOne({ _id: req.body.id });
-    const likingUser = await user.findOne({ Username: req.body.user });
+    const likingUser = await user.findOne({ _id: req.body.user });
 
     if (forum.likes.includes(likingUser._id)) {
       forum.likes.splice(forum.likes.indexOf(likingUser._id), 1);
@@ -55,7 +55,7 @@ module.exports.like = async (req, res, next) => {
 module.exports.create = async (req, res, next) => {
   try {
     const person = await user
-      .findOne({ Username: req.body.user })
+      .findOne({ _id: req.body.user })
       .then((person) => {
         const forum = new model({
           title: req.body.title,
@@ -135,7 +135,7 @@ module.exports.getCmtPath = async (req, res, next) => {
 
     res.status(201).send(JSON.stringify({ forum: cmt.to, path: data }));
   } catch (e) {
-    res.sendStatus(401);
+    res.sendStatus(400);
     next(e);
   }
 };
@@ -143,7 +143,7 @@ module.exports.getCmtPath = async (req, res, next) => {
 module.exports.likeCmt = async (req, res, next) => {
   try {
     const cmt = await cmnt.findOne({ _id: req.body.id });
-    const likingUser = await user.findOne({ Username: req.body.user });
+    const likingUser = await user.findOne({ _id: req.body.user });
 
     if (cmt.likes.includes(likingUser._id)) {
       cmt.likes.splice(cmt.likes.indexOf(likingUser._id), 1);
@@ -183,7 +183,7 @@ module.exports.likeCmt = async (req, res, next) => {
 module.exports.comment = async (req, res, next) => {
   try {
     const data = req.body;
-    const from = await user.findOne({ Username: data.user });
+    const from = await user.findOne({ _id: data.user });
 
     let to = data.to;
     let toPost = await model.findOne({ _id: to });
@@ -233,3 +233,52 @@ module.exports.comment = async (req, res, next) => {
     next(e);
   }
 };
+
+async function delComment(itemId){
+  const cmts = await cmnt.find({to:itemId});
+  cmnt.deleteOne({_id:itemId}).then((res)=>{
+    // console.log(res);
+  });
+  cmts.forEach((item)=>{
+    delComment(item);
+  })
+}
+
+module.exports.delete = async (req,res,next) =>{
+  try{
+    let toDelete;
+    if(req.body.type=='Post'){
+      toDelete = await model.findOne({_id:req.body.id}, 'createdBy');
+      if(toDelete.createdBy != req.body.user){
+        res.sendStatus(401);
+        return;
+      }
+      delComment(req.body.id);
+      model.deleteOne({_id:req.body.id}).then((result)=>{
+        console.log(result);
+        res.sendStatus(201);
+        return;
+      })
+    }else {
+      toDelete = await cmnt.findOne({_id:req.body.id}, 'from');
+      if(toDelete.from != req.body.user){
+        res.sendStatus(401);
+        return;
+      }
+      
+      delComment(req.body.id)
+
+      cmnt.deleteOne({_id:req.body.id}).then((result)=>{
+        console.log(result);
+        res.sendStatus(201);
+        return;
+      })
+    }
+    
+    // res.sendStatus(400);
+
+  }catch(e){
+    res.sendStatus(400);
+    next(e);
+  }
+}

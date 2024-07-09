@@ -65,7 +65,6 @@ app.listen(process.env.PORT, ()=>{
 io.on('connection', (socket) => {
     socket.on("login", (arg)=>{
         socket.join(arg)
-
     })
 });
 
