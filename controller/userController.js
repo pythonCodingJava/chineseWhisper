@@ -6,23 +6,22 @@ const index = require("../index");
 
 module.exports.register = async (req, res, next) => {
   try {
-    const { Username, Password, email } = req.body;
+    const { Username, Password } = req.body;
     if (await model.findOne({ Username: Username })) {
       console.log("exists");
       return res.json({ message: "Username exists", status: "ui" });
     }
-    if (await model.findOne({ email: email })) {
-      console.log("exists");
-      return res.json({ message: "email exists", status: "ei" });
-    }
-    if (!validator.validate(email) || !email.includes("nitkkr.ac.in")) {
-      console.log("email doesnt exist");
-      return res.json({ message: "Invalid email", status: "ee" });
-    }
+    // if (await model.findOne({ email: email })) {
+    //   console.log("exists");
+    //   return res.json({ message: "email exists", status: "ei" });
+    // }
+    // if (!validator.validate(email) || !email.includes("nitkkr.ac.in")) {
+    //   console.log("email doesnt exist");
+    //   return res.json({ message: "Invalid email", status: "ee" });
+    // }
     console.log(`${Username} added`);
     let User = new model();
     User.Username = Username;
-    User.email = email;
     User.setPassword(Password);
     User.save();
     return res.json({ message: "User added successfully", status: "success" });
