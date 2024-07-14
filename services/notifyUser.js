@@ -11,7 +11,6 @@ module.exports.notifyUser = async (userid, notification) => {
       new Date().getDate() - item.date.getDate() >= 3
     ) {
       dudeToNotify.notifications.splice(i, 1);
-      break;
     }
   }
 
